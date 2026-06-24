@@ -287,7 +287,8 @@ function init() {
 
   const loader = new GLTFLoader();
 
-  loader.load("./Models/Dog.gltf", (gltf) => {
+  // 🛠️ RUTA CORREGIDA: Al estar index.html y Dog.gltf al mismo nivel, cargamos directo desde "./Dog.gltf"
+  loader.load("./Dog.gltf", (gltf) => {
     gltfData = gltf; 
     pet = gltf.scene;
 
