@@ -115,7 +115,7 @@
   #reveal {
     position: fixed;
     inset: 0;
-    background: #1c1c1f; /* Gris concreto industrial oscuro */
+    background: #1c1c1f; 
     display: none;
     flex-direction: column;
     align-items: center;
@@ -143,23 +143,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 40px;
-    height: 160px;
+    gap: 30px;
+    height: auto;
     visibility: hidden;
     animation: floatAnimation 3.5s ease-in-out infinite alternate;
   }
 
-  /* Logos grandes e invertidos para contraste premium */
+  /* Tamaño base para celular */
   .logo-img {
-    height: 110px;
+    height: 80px;
     width: auto;
     object-fit: contain;
     filter: invert(1);
   }
 
   .part-prrts { opacity: 0; transform: translateX(50px); }
-  .part-x { font-size: 42px; font-weight: 900; color: #ff3df2; opacity: 0; transform: scale(0); font-family: Arial, sans-serif; }
+  .part-x { font-size: 32px; font-weight: 900; color: #ff3df2; opacity: 0; transform: scale(0); font-family: Arial, sans-serif; }
   .part-diama { opacity: 0; transform: translateX(-50px); }
+
+  /* 🔥 RESPONSIVE: LOGOS MAS GRANDES EN PC EN EL REVEAL */
+  @media (min-width: 768px) {
+    .brand-container { gap: 60px; }
+    .logo-img { height: 220px; } /* Logos masivos e impactantes en PC */
+    .part-x { font-size: 72px; }  /* X gigante en PC */
+  }
 
   .reveal-footer {
     position: absolute;
@@ -228,7 +235,7 @@
   <button id="btn-play">🎾 Play</button>
 </div>
 
-<!-- 🎬 PANTALLA DE REVELACIÓN CON FILTRO CONCRETO INDUSTRIAL -->
+<!-- 🎬 PANTALLA DE REVELACIÓN -->
 <div id="reveal" onclick="handleRevealClick()">
   <div class="reveal-title" id="reveal-text-header">¡OH! PRRT ESTÁ EVOLUCIONANDO</div>
   <div class="brand-container">
@@ -346,7 +353,7 @@ function init() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    recalculateModelBounds(); /* Forzar redimensión dinámica al cambiar tamaño de pantalla */
+    recalculateModelBounds(); 
   });
 
   document.getElementById("btn-feed").addEventListener("click", feed);
@@ -390,22 +397,18 @@ function setupAnimationMixer() {
   }
 }
 
-/* 🔍 DETECCIÓN RESPONSIVA PARA LLENAR LA PANTALLA EN PC */
+/* 🔄 TAMAÑO ORIGINAL RESTAURADO: Prrt mantiene su escala cómoda idéntica en cualquier pantalla */
 function recalculateModelBounds() {
   if (!pet) return;
   const box = new THREE.Box3().setFromObject(pet);
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3()).length();
   
-  // Si la pantalla es de PC (ancho mayor a 768px), el factor de tamaño es el doble (2.3). En Cel se queda original (1.1).
-  const isDesktop = window.innerWidth > 768;
-  const multiplier = isDesktop ? 2.3 : 1.1;
-  
-  baseScale = multiplier / size; 
+  baseScale = 1.2 / size; 
   pet.scale.setScalar(baseScale); 
   
   pet.position.x = -center.x * baseScale;
-  pet.position.y = (-box.min.y * baseScale) - (isDesktop ? 0.3 : 0); /* Centrar mejor verticalmente en monitores grandes */
+  pet.position.y = -box.min.y * baseScale; 
   pet.position.z = -center.z * baseScale;
 }
 
@@ -542,7 +545,6 @@ window.handleRevealClick = function() {
   const header = document.getElementById("reveal-text-header");
 
   if (revealStep === 0) {
-    // 🎛️ LOOK LIMINAL: Desaparece por completo el texto superior, dejando únicamente los logos flotando.
     header.style.opacity = "0"; 
     revealDiv.classList.add("mutated");
     revealStep = 1;
