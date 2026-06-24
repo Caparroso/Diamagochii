@@ -9,172 +9,350 @@
   body { 
     margin: 0; 
     overflow: hidden; 
-    background: #0b0b10; 
+    background: radial-gradient(circle, #f0f3f7 0%, #d8e2eb 100%);
     font-family: Arial, sans-serif; 
     user-select: none; 
   }
   canvas { 
     display: block; 
+    cursor: grab;
+  }
+  canvas:active {
+    cursor: grabbing;
   }
 
+  /* 🫧 OVERLAY DE ENTRADA: ESTILO DIALOGO DE WII TOTALMENTE FIEL */
+  #start-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(225, 234, 242, 0.4); 
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.5s;
+  }
+
+  .start-card {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.88) 0%, rgba(240, 245, 250, 0.88) 100%);
+    border: 3px solid #b2c4d6; 
+    border-radius: 35px;
+    padding: 50px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 35px rgba(145, 165, 185, 0.3), inset 0 2px 4px rgba(255,255,255,1);
+    text-align: center;
+    cursor: pointer;
+    width: 85%;
+    max-width: 440px;
+    box-sizing: border-box;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .start-card:hover {
+    transform: scale(1.03);
+    border-color: #8faec4;
+  }
+
+  .start-title {
+    font-size: 34px;
+    font-weight: bold;
+    color: #4a5866;
+    letter-spacing: 0.5px;
+    margin: 0 0 30px 0;
+    text-shadow: 0 2px 3px rgba(255,255,255,1);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .start-prompt {
+    font-size: 13px;
+    font-weight: bold;
+    color: #5d6e7f;
+    padding: 10px 28px;
+    border-radius: 25px;
+    border: 2px solid #a8bdcf;
+    background: linear-gradient(to bottom, #ffffff 0%, #f4f8fb 40%, #e3edf5 100%);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1);
+    animation: floatPrompt 2s ease-in-out infinite alternate;
+    transition: all 0.2s ease;
+  }
+
+  .start-card:hover .start-prompt {
+    background: linear-gradient(to bottom, #ffffff 0%, #eaf3f9 40%, #d4e3ef 100%);
+    border-color: #7fa4c2;
+  }
+
+  /* 🌌 HUD INFERIOR ESTILO BARRA DE WII */
   #ui {
     position: fixed;
-    bottom: 0;
-    width: 100%;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
     display: flex;
     justify-content: space-around;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.7);
+    padding: 12px 24px;
+    background: linear-gradient(to bottom, #ffffff 0%, #e4ecf5 100%);
+    border-radius: 50px; 
     z-index: 10;
     box-sizing: border-box;
-    border-top: 2px solid #ff3df2;
+    border: 3px solid #b0c2d4;
+    box-shadow: 0 10px 25px rgba(160, 180, 200, 0.5), inset 0 2px 5px rgba(255,255,255,1);
   }
 
   button {
-    padding: 14px 28px;
-    border: none;
-    border-radius: 10px;
-    background: #ff3df2;
-    color: white;
+    padding: 12px 35px;
+    border: 2px solid #a3b8cc;
+    border-radius: 30px;
+    background: linear-gradient(to bottom, #ffffff 0%, #f2f6fa 40%, #e1eaf2 100%);
+    color: #4a5866;
     font-weight: bold;
+    font-size: 15px;
     cursor: pointer;
-    font-size: 16px;
-    transition: transform 0.1s, background 0.2s;
-    box-shadow: 0 4px 10px rgba(255, 61, 242, 0.4);
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  button:active { transform: scale(0.95); }
-  button:hover { background: #e032d5; }
-  button:disabled { background: #444; color: #888; box-shadow: none; cursor: not-allowed; }
+  
+  button:hover { 
+    background: linear-gradient(to bottom, #ffffff 0%, #eaf2fa 40%, #cbdbe8 100%);
+    border-color: #7da0c2;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(125, 160, 194, 0.3);
+  }
+  
+  button:active { 
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  button:disabled { 
+    background: #e6e6e6; 
+    color: #aaaaaa; 
+    border-color: #cccccc;
+    box-shadow: none; 
+    cursor: not-allowed; 
+    transform: none;
+  }
 
   #stats {
     position: fixed;
-    top: 10px;
-    left: 10px;
-    color: white;
-    font-size: 14px;
+    top: 20px;
+    left: 20px;
+    color: #3b4854;
+    font-size: 13px;
+    font-weight: bold;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 12px;
-    border-radius: 8px;
-    line-height: 1.6;
-    border-left: 3px solid #3dffae;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 16px;
+    border-radius: 20px;
+    line-height: 1.8;
+    border: 2px solid #cbdbe8;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
   }
 
   .progress-bar {
-    width: 100px;
-    height: 8px;
-    background: #222;
+    width: 110px;
+    height: 14px;
+    background: #e2eaf0;
     display: inline-block;
-    border-radius: 4px;
+    border-radius: 20px;
     overflow: hidden;
-    margin-left: 5px;
+    margin-left: 8px;
     vertical-align: middle;
+    border: 1px solid #bcccda;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
   }
 
   .progress-fill {
     height: 100%;
-    background: #3dffae;
+    background: linear-gradient(to bottom, #5ce1e6 0%, #00c2cb 100%);
     width: 0%;
-    transition: width 0.3s;
+    border-radius: 20px;
+    transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 0 1px 3px rgba(0, 194, 203, 0.4);
   }
 
-  /* 🎨 PALETA SELECTORA DE COLORES PARA PRRT */
   #color-picker {
     position: fixed;
-    top: 10px;
-    right: 10px;
+    top: 20px;
+    right: 20px;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 10px 14px;
-    border-radius: 8px;
-    border-right: 3px solid #ff3df2;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 10px 16px;
+    border-radius: 25px;
+    border: 2px solid #cbdbe8;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  }
+  .color-label {
+    color: #5a6978;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .color-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .color-dot:hover {
+    transform: scale(1.3);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  #volume-container {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 10px 16px;
+    border-radius: 25px;
+    border: 2px solid #cbdbe8;
     display: flex;
     align-items: center;
     gap: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
   }
-  .color-label {
-    color: #eee;
-    font-size: 12px;
+  .volume-icon {
+    font-size: 14px;
+    color: #5a6978;
     font-weight: bold;
-    font-family: monospace;
   }
-  .color-dot {
-    width: 20px;
-    height: 20px;
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px;
+    height: 6px;
+    background: #cbdbe8;
+    border-radius: 5px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
+    background: linear-gradient(to bottom, #5ce1e6 0%, #00c2cb 100%);
     cursor: pointer;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    transition: transform 0.1s, border-color 0.2s;
-  }
-  .color-dot:hover {
-    transform: scale(1.2);
-    border-color: #fff;
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
   }
 
-  /* 🎬 OVERLAY DE REVELACIÓN - GRIS CONCRETO OSCURO SOFT */
+  /* 🎬 OVERLAY DE REVELACIÓN (Fondo en la raíz) */
   #reveal {
     position: fixed;
     inset: 0;
-    background: #1c1c1f; 
+    background-image: url('frutriger.png'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 100;
-    color: white;
-    font-family: 'Courier New', Courier, monospace;
     cursor: pointer;
+    backdrop-filter: blur(2px);
+  }
+
+  .reveal-content-wrapper {
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 40px;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 85%;
+    max-width: 550px;
+    box-shadow: 0 20px 50px rgba(90, 110, 140, 0.25);
   }
 
   .reveal-title {
-    font-size: 16px;
-    letter-spacing: 4px;
-    color: #3dffae;
-    margin-bottom: 30px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #2e4053; 
+    margin-bottom: 35px;
     text-align: center;
     font-weight: bold;
-    max-width: 80%;
-    line-height: 1.4;
+    max-width: 90%;
+    line-height: 1.5;
+    font-family: system-ui, -apple-system, sans-serif;
+    text-shadow: 0 2px 4px rgba(255,255,255,0.8);
     transition: opacity 0.3s ease;
   }
 
-  /* Contenedor de logos flotantes liminales */
   .brand-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 30px;
+    gap: 20px;
     height: auto;
     visibility: hidden;
-    animation: floatAnimation 3.5s ease-in-out infinite alternate;
+    animation: floatAnimation 4s ease-in-out infinite alternate;
   }
 
-  /* Tamaño base para celular */
   .logo-img {
-    height: 80px;
+    height: 140px; 
     width: auto;
     object-fit: contain;
-    filter: invert(1);
+    filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.15));
   }
 
-  .part-prrts { opacity: 0; transform: translateX(50px); }
-  .part-x { font-size: 32px; font-weight: 900; color: #ff3df2; opacity: 0; transform: scale(0); font-family: Arial, sans-serif; }
-  .part-diama { opacity: 0; transform: translateX(-50px); }
+  .part-prrts { opacity: 0; transform: translateX(40px); }
+  
+  .part-x { 
+    font-size: 44px; 
+    font-weight: 900; 
+    color: #222224; 
+    text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.6); 
+    opacity: 0; 
+    transform: scale(0); 
+    font-family: Arial, sans-serif; 
+  }
+  
+  .part-diama { opacity: 0; transform: translateX(-40px); }
 
-  /* 🔥 RESPONSIVE: LOGOS MAS GRANDES EN PC EN EL REVEAL */
   @media (min-width: 768px) {
-    .brand-container { gap: 60px; }
-    .logo-img { height: 220px; } /* Logos masivos e impactantes en PC */
-    .part-x { font-size: 72px; }  /* X gigante en PC */
+    .reveal-content-wrapper { padding: 60px 50px; max-width: 700px; }
+    .brand-container { gap: 45px; }
+    .logo-img { height: 210px; } 
+    .part-x { font-size: 64px; }  
   }
 
   .reveal-footer {
     position: absolute;
     bottom: 30px;
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: bold;
     opacity: 0;
-    color: rgba(255, 255, 255, 0.3);
+    color: #5a6978;
     letter-spacing: 1px;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    font-family: system-ui, sans-serif;
   }
 
   #reveal.active { display: flex; }
@@ -186,9 +364,9 @@
   #reveal.mutated .reveal-footer { animation: fadeIn 0.8s 2.2s forwards; }
 
   #reveal.surprise .brand-container { display: none; }
-  #reveal.surprise .reveal-title { font-size: 24px; color: #ffffff; letter-spacing: 2px; white-space: pre-line; }
+  #reveal.surprise .reveal-title { font-size: 26px; color: #1c2833; letter-spacing: 1px; white-space: pre-line; }
 
-  /* 💀 PANTALLA DE MUERTE (GAME OVER) */
+  /* 💀 PANTALLA DE MUERTE */
   #gameover-screen {
     position: fixed;
     inset: 0;
@@ -206,28 +384,56 @@
   #gameover-screen h1 { font-size: 40px; margin-bottom: 10px; letter-spacing: 3px; }
   #gameover-screen p { color: #eee; font-size: 18px; margin-bottom: 30px; max-width: 500px; }
 
-  @keyframes fadeIn { to { opacity: 1; } }
+  @media (max-width: 480px) {
+    #stats { top: 10px; left: 10px; padding: 10px; font-size: 11px; }
+    .progress-bar { width: 80px; }
+    #color-picker { top: 10px; right: 10px; padding: 6px 10px; gap: 8px; }
+    .color-dot { width: 18px; height: 18px; }
+    #volume-container { bottom: 90px; right: 10px; padding: 6px 10px; }
+    input[type="range"] { width: 60px; }
+    #ui { bottom: 10px; padding: 8px 16px; }
+    button { padding: 8px 20px; font-size: 13px; }
+  }
+
+  @keyframes fadeIn { to { opacity: 0.7; } }
   @keyframes popIn { to { opacity: 1; transform: scale(1); } }
   @keyframes slideInLeft { to { opacity: 1; transform: translateX(0); } }
   @keyframes slideInRight { to { opacity: 1; transform: translateX(0); } }
   
   @keyframes floatAnimation {
     0% { transform: translateY(0px); }
-    100% { transform: translateY(-15px); }
+    100% { transform: translateY(-12px); }
+  }
+
+  @keyframes floatPrompt {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-5px); }
   }
 </style>
 </head>
 
 <body>
 
+<div id="start-overlay" onclick="closeStartOverlay()">
+  <div class="start-card">
+    <h1 class="start-title">Diamagochii</h1>
+    <div class="start-prompt">(Toca para jugar)</div>
+  </div>
+</div>
+
 <div id="stats"></div>
 
 <div id="color-picker">
   <span class="color-label">SKIN:</span>
+  <div class="color-dot" style="background: #F5F5DC;" onclick="changePetColor(0xF5F5DC)"></div>
   <div class="color-dot" style="background: #8B5A2B;" onclick="changePetColor(0x8B5A2B)"></div>
   <div class="color-dot" style="background: #1A1A1A;" onclick="changePetColor(0x1A1A1A)"></div>
   <div class="color-dot" style="background: #7F8C8D;" onclick="changePetColor(0x7F8C8D)"></div>
-  <div class="color-dot" style="background: #F5F5DC;" onclick="changePetColor(0xF5F5DC)"></div>
+</div>
+
+<div id="volume-container">
+  <span class="volume-icon">♪</span>
+  <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
 </div>
 
 <div id="ui">
@@ -235,13 +441,14 @@
   <button id="btn-play">🎾 Play</button>
 </div>
 
-<!-- 🎬 PANTALLA DE REVELACIÓN -->
 <div id="reveal" onclick="handleRevealClick()">
-  <div class="reveal-title" id="reveal-text-header">¡OH! PRRT ESTÁ EVOLUCIONANDO</div>
-  <div class="brand-container">
-    <img src="./Prrts.png" alt="Prrts Logo" class="logo-img part-prrts" />
-    <span class="part-x">X</span>
-    <img src="./Diama.png" alt="Diama Logo" class="logo-img part-diama" />
+  <div class="reveal-content-wrapper">
+    <div class="reveal-title" id="reveal-text-header">¡OH! PRRT ESTÁ EVOLUCIONANDO</div>
+    <div class="brand-container">
+      <img src="Prrts.png" alt="Prrts Logo" class="logo-img part-prrts" /> 
+      <span class="part-x">X</span>
+      <img src="Diama.png" alt="Diama Logo" class="logo-img part-diama" /> 
+    </div>
   </div>
   <div class="reveal-footer">clic en cualquier lugar para continuar</div>
 </div>
@@ -249,7 +456,7 @@
 <div id="gameover-screen">
   <h1>GAME OVER</h1>
   <p id="death-reason">Oh no, prrt ha muerto...</p>
-  <button onclick="window.location.reload()" style="background: #ff3d3d; box-shadow: 0 4px 10px rgba(255,61,61,0.4);">Intentar de Nuevo</button>
+  <button onclick="window.location.reload()" style="background: #ff3d3d; box-shadow: 0 4px 10px rgba(255,61,61,0.4); color: white;">Intentar de Nuevo</button>
 </div>
 
 <script type="importmap">
@@ -282,15 +489,29 @@ let evolutionPending = false;
 let isDead = false;
 let revealStep = 0; 
 
-const dogColors = [0x8B5A2B, 0x1A1A1A, 0x7F8C8D, 0xF5F5DC];
-let activeColor = dogColors[Math.floor(Math.random() * dogColors.length)];
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let dragStartTimestamp = 0;
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+const savedColor = localStorage.getItem("prrt_active_color");
+let activeColor = savedColor ? parseInt(savedColor, 16) : 0xF5F5DC;
+
+// 🎹 CORRECCIÓN DE EXTENSIÓN MP3 PARA GITHUB (A la altura del index)
+const audioPath = "Interfaz Sound.mp3"; 
+const audioChannels = [new Audio(audioPath), new Audio(audioPath)];
+let activeChannelIndex = 0;
+let userVolume = 0.5; 
+let audioStarted = false;
+const crossfadeTime = 3; 
 
 init();
 animate();
 
 function init() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0b0b10);
+  scene.background = new THREE.Color(0xe1eaf2);
 
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.set(0, 1.2, 3.5); 
@@ -301,14 +522,15 @@ function init() {
   renderer.colorSpace = THREE.SRGBColorSpace; 
   document.body.appendChild(renderer.domElement);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 1.8));
-  const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+  scene.add(new THREE.AmbientLight(0xffffff, 2.2));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
   dirLight.position.set(5, 5, 5);
   scene.add(dirLight);
 
   const loader = new GLTFLoader();
 
-  loader.load("./Dog.gltf", (gltf) => {
+  // Modelo en la raíz
+  loader.load("Dog.gltf", (gltf) => {
     gltfData = gltf; 
     pet = gltf.scene;
 
@@ -358,6 +580,98 @@ function init() {
 
   document.getElementById("btn-feed").addEventListener("click", feed);
   document.getElementById("btn-play").addEventListener("click", play);
+
+  const slider = document.getElementById("volume-slider");
+  slider.addEventListener("input", (e) => {
+    userVolume = parseFloat(e.target.value);
+    audioChannels[0].volume = userVolume;
+    audioChannels[1].volume = userVolume;
+  });
+
+  const canvasEl = renderer.domElement;
+
+  const onPointerDown = (x, y) => {
+    if (!pet || isDead || evolutionPending) return;
+    isDragging = true;
+    previousMousePosition = { x, y };
+    dragStartTimestamp = performance.now();
+  };
+
+  const onPointerMove = (x, y) => {
+    if (!isDragging || !pet) return;
+    const deltaX = x - previousMousePosition.x;
+    pet.rotation.y += deltaX * 0.007; 
+    previousMousePosition = { x, y };
+  };
+
+  const onPointerUp = (clientX, clientY) => {
+    isDragging = false;
+    if (!pet || isDead || evolutionPending) return;
+
+    const dragDuration = performance.now() - dragStartTimestamp;
+    if (dragDuration < 250) {
+      mouse.x = (clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(pet.children, true);
+
+      if (intersects.length > 0) {
+        if (actions["Turn_Left"]) {
+          triggerInteractionAnimation("Turn_Left");
+        } else if (actions["Turn_Right"]) {
+          triggerInteractionAnimation("Turn_Right");
+        } else {
+          triggerInteractionAnimation("Headbutt");
+        }
+      }
+    }
+  };
+
+  canvasEl.addEventListener("mousedown", (e) => onPointerDown(e.clientX, e.clientY));
+  window.addEventListener("mousemove", (e) => onPointerMove(e.clientX, e.clientY));
+  window.addEventListener("mouseup", (e) => onPointerUp(e.clientX, e.clientY));
+
+  canvasEl.addEventListener("touchstart", (e) => {
+    if (e.touches.length > 0) onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  window.addEventListener("touchmove", (e) => {
+    if (e.touches.length > 0) onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  window.addEventListener("touchend", (e) => {
+    if (e.changedTouches.length > 0) onPointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  });
+}
+
+window.closeStartOverlay = function() {
+  const overlay = document.getElementById("start-overlay");
+  overlay.style.opacity = "0";
+  setTimeout(() => {
+    overlay.style.visibility = "hidden";
+  }, 500);
+
+  if (!audioStarted) {
+    startAmbientAudio();
+  }
+};
+
+function startAmbientAudio() {
+  audioStarted = true;
+  audioChannels[0].volume = userVolume;
+  audioChannels[1].volume = 0; 
+  audioChannels[0].play().catch(err => console.log("Audio bloqueado:", err));
+  setInterval(checkAudioCrossfade, 500);
+}
+
+function checkAudioCrossfade() {
+  const current = audioChannels[activeChannelIndex];
+  const next = audioChannels[1 - activeChannelIndex];
+  if (current.duration && (current.duration - current.currentTime <= crossfadeTime) && next.paused) {
+    next.currentTime = 0;
+    next.volume = userVolume; 
+    next.play().catch(err => console.log(err));
+    activeChannelIndex = 1 - activeChannelIndex;
+  }
 }
 
 function applyPetMaterial(hexColor) {
@@ -366,9 +680,9 @@ function applyPetMaterial(hexColor) {
     if (c.isMesh) {
       c.material = new THREE.MeshStandardMaterial({
         color: new THREE.Color(hexColor), 
-        roughness: 0.75,                
-        metalness: 0.05,                
-        envMapIntensity: 0.5            
+        roughness: 0.6,                
+        metalness: 0.1,                
+        envMapIntensity: 0.8            
       });
     }
   });
@@ -378,18 +692,16 @@ window.changePetColor = function(hexColor) {
   if (isDead) return;
   activeColor = hexColor;
   applyPetMaterial(hexColor);
+  localStorage.setItem("prrt_active_color", "0x" + hexColor.toString(16));
 };
 
 function setupAnimationMixer() {
   if (mixer) mixer.stopAllAction();
-  
   mixer = new THREE.AnimationMixer(pet);
   actions = {};
-
   gltfData.animations.forEach((clip) => {
     actions[clip.name] = mixer.clipAction(clip);
   });
-
   if (actions["Idle"] && !isDead) {
     currentAction = actions["Idle"];
     currentAction.setLoop(THREE.LoopRepeat);
@@ -397,16 +709,13 @@ function setupAnimationMixer() {
   }
 }
 
-/* 🔄 TAMAÑO ORIGINAL RESTAURADO: Prrt mantiene su escala cómoda idéntica en cualquier pantalla */
 function recalculateModelBounds() {
   if (!pet) return;
   const box = new THREE.Box3().setFromObject(pet);
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3()).length();
-  
   baseScale = 1.2 / size; 
   pet.scale.setScalar(baseScale); 
-  
   pet.position.x = -center.x * baseScale;
   pet.position.y = -box.min.y * baseScale; 
   pet.position.z = -center.z * baseScale;
@@ -414,25 +723,18 @@ function recalculateModelBounds() {
 
 function triggerInteractionAnimation(name) {
   if (!mixer || !actions[name] || !actions["Idle"] || evolutionPending || isDead) return;
-
   if (animationTimeout) clearTimeout(animationTimeout);
-
   const targetAction = actions[name];
   const idleAction = actions["Idle"];
-
   targetAction.reset();
   targetAction.setLoop(THREE.LoopOnce);
   targetAction.clampWhenFinished = true;
-
   if (currentAction && currentAction !== targetAction) {
     targetAction.crossFadeFrom(currentAction, 0.05, true);
   }
-  
   targetAction.play();
   currentAction = targetAction;
-
   const durationInMs = targetAction.getClip().duration * 1000;
-
   animationTimeout = setTimeout(() => {
     if (mixer && !isDead) {
       idleAction.reset();
@@ -446,12 +748,9 @@ function triggerInteractionAnimation(name) {
 function triggerDeath(reasonText) {
   isDead = true;
   if (animationTimeout) clearTimeout(animationTimeout);
-  
   document.getElementById("btn-feed").disabled = true;
   document.getElementById("btn-play").disabled = true;
-
   if (mixer) mixer.stopAllAction();
-  
   if (actions["Death"]) {
     const deathAction = actions["Death"];
     deathAction.reset();
@@ -459,7 +758,6 @@ function triggerDeath(reasonText) {
     deathAction.clampWhenFinished = true; 
     deathAction.play();
   }
-
   setTimeout(() => {
     document.getElementById("death-reason").innerText = reasonText;
     document.getElementById("gameover-screen").style.display = "flex";
@@ -477,10 +775,10 @@ function updateStats() {
   if (isDead) return;
   const evoWidth = evoProgress + "%";
   document.getElementById("stats").innerHTML = `
-    🍖 Hunger: ${hunger}% (0% = lleno)<br/>
+    🍖 Hunger: ${hunger}%<br/>
     ❤️ Happiness: ${happiness}%<br/>
     🌱 Stage: ${evolution === 0 ? "Baby PRRT" : evolution === 1 ? "DIAMA Mode" : "Max Alpha"}<br/>
-    🧬 Evo Progress: <div class="progress-bar"><div class="progress-fill" style="width: ${evoWidth}"></div></div>
+    🧬 Evo: <div class="progress-bar"><div class="progress-fill" style="width: ${evoWidth}"></div></div>
   `;
 }
 
@@ -494,7 +792,6 @@ function checkEvolutionTriggers() {
 
 function feed() { 
   if (evolutionPending || isDead) return;
-
   if (hunger <= 0) {
     overfeedingCounter++;
     if (overfeedingCounter >= 3) { 
@@ -502,26 +799,21 @@ function feed() {
       return;
     }
   }
-
   hunger = Math.max(0, hunger - 20); 
   happiness = Math.min(100, happiness + 4);
   updateStats(); 
-  
   triggerInteractionAnimation("Idle_Eating"); 
 }
 
 function play() { 
   if (evolutionPending || isDead) return;
-
   if (happiness >= 100) {
     triggerDeath("oh no prrt le dio un paro cardiaco por agitarse muchooo.");
     return;
   }
-
   hunger = Math.min(100, hunger + 8); 
   happiness = Math.min(100, happiness + 20); 
   updateStats(); 
-  
   triggerInteractionAnimation("Headbutt"); 
 }
 
@@ -529,21 +821,17 @@ function triggerEvolvementAlert(targetLevel, textHeader) {
   evolutionPending = true;
   window.nextEvolutionLevel = targetLevel; 
   revealStep = 0; 
-  
   const revealDiv = document.getElementById("reveal");
   revealDiv.classList.remove("active", "mutated", "surprise");
-  
   const header = document.getElementById("reveal-text-header");
   header.style.opacity = "1";
   header.innerText = textHeader;
-  
   revealDiv.classList.add("active");
 }
 
 window.handleRevealClick = function() {
   const revealDiv = document.getElementById("reveal");
   const header = document.getElementById("reveal-text-header");
-
   if (revealStep === 0) {
     header.style.opacity = "0"; 
     revealDiv.classList.add("mutated");
@@ -552,17 +840,15 @@ window.handleRevealClick = function() {
   else if (revealStep === 1) {
     revealDiv.classList.add("surprise");
     header.style.opacity = "1";
-    header.innerText = "VIERNES 17 DE JULIO DEL 2026\n";
+    header.innerText = "VIERNES 17 DE JULIO DEL 2026\n"; 
     revealStep = 2;
   } 
   else if (revealStep === 2) {
     evolution = window.nextEvolutionLevel;
     evoProgress = 0; 
     overfeedingCounter = 0; 
-
     setupAnimationMixer();
     updateStats();
-
     revealDiv.classList.remove("active", "mutated", "surprise");
     evolutionPending = false;
     revealStep = 0;
