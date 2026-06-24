@@ -111,11 +111,11 @@
     border-color: #fff;
   }
 
-  /* 🎬 PANTALLA DE REVELACIÓN EVOLUTIVA CINEMÁTICA Y2K */
+  /* 🎬 OVERLAY DE REVELACIÓN - GRIS CONCRETO OSCURO SOFT */
   #reveal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.98);
+    background: #1c1c1f; /* Gris concreto industrial oscuro */
     display: none;
     flex-direction: column;
     align-items: center;
@@ -135,37 +135,38 @@
     font-weight: bold;
     max-width: 80%;
     line-height: 1.4;
+    transition: opacity 0.3s ease;
   }
 
-  /* Contenedor de logos adaptado */
+  /* Contenedor de logos flotantes liminales */
   .brand-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    height: 120px;
+    gap: 40px;
+    height: 160px;
     visibility: hidden;
-    animation: floatAnimation 3s ease-in-out infinite alternate; /* Animación de flotado constante */
+    animation: floatAnimation 3.5s ease-in-out infinite alternate;
   }
 
-  /* Estilos para los logos PNG e inversión de color para fondos oscuros */
+  /* Logos grandes e invertidos para contraste premium */
   .logo-img {
-    height: 80px;
+    height: 110px;
     width: auto;
     object-fit: contain;
-    filter: invert(1); /* Convierte logos oscuros/negros a blanco brillante */
+    filter: invert(1);
   }
 
-  .part-prrts { opacity: 0; transform: translateX(40px); }
-  .part-x { font-size: 36px; font-weight: 900; color: #ff3df2; opacity: 0; transform: scale(0); font-family: Arial, sans-serif; }
-  .part-diama { opacity: 0; transform: translateX(-40px); }
+  .part-prrts { opacity: 0; transform: translateX(50px); }
+  .part-x { font-size: 42px; font-weight: 900; color: #ff3df2; opacity: 0; transform: scale(0); font-family: Arial, sans-serif; }
+  .part-diama { opacity: 0; transform: translateX(-50px); }
 
   .reveal-footer {
     position: absolute;
     bottom: 30px;
     font-size: 11px;
     opacity: 0;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.3);
     letter-spacing: 1px;
   }
 
@@ -178,7 +179,7 @@
   #reveal.mutated .reveal-footer { animation: fadeIn 0.8s 2.2s forwards; }
 
   #reveal.surprise .brand-container { display: none; }
-  #reveal.surprise .reveal-title { font-size: 24px; color: #ffffff; letter-spacing: 2px; }
+  #reveal.surprise .reveal-title { font-size: 24px; color: #ffffff; letter-spacing: 2px; white-space: pre-line; }
 
   /* 💀 PANTALLA DE MUERTE (GAME OVER) */
   #gameover-screen {
@@ -203,10 +204,9 @@
   @keyframes slideInLeft { to { opacity: 1; transform: translateX(0); } }
   @keyframes slideInRight { to { opacity: 1; transform: translateX(0); } }
   
-  /* Efecto flotando sutil */
   @keyframes floatAnimation {
     0% { transform: translateY(0px); }
-    100% { transform: translateY(-12px); }
+    100% { transform: translateY(-15px); }
   }
 </style>
 </head>
@@ -228,7 +228,7 @@
   <button id="btn-play">🎾 Play</button>
 </div>
 
-<!-- 🎬 PANTALLA DE REVELACIÓN CON LOGOS FLOTANTES -->
+<!-- 🎬 PANTALLA DE REVELACIÓN CON FILTRO CONCRETO INDUSTRIAL -->
 <div id="reveal" onclick="handleRevealClick()">
   <div class="reveal-title" id="reveal-text-header">¡OH! PRRT ESTÁ EVOLUCIONANDO</div>
   <div class="brand-container">
@@ -346,6 +346,7 @@ function init() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    recalculateModelBounds(); /* Forzar redimensión dinámica al cambiar tamaño de pantalla */
   });
 
   document.getElementById("btn-feed").addEventListener("click", feed);
@@ -389,16 +390,22 @@ function setupAnimationMixer() {
   }
 }
 
+/* 🔍 DETECCIÓN RESPONSIVA PARA LLENAR LA PANTALLA EN PC */
 function recalculateModelBounds() {
+  if (!pet) return;
   const box = new THREE.Box3().setFromObject(pet);
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3()).length();
   
-  baseScale = 1.2 / size; 
+  // Si la pantalla es de PC (ancho mayor a 768px), el factor de tamaño es el doble (2.3). En Cel se queda original (1.1).
+  const isDesktop = window.innerWidth > 768;
+  const multiplier = isDesktop ? 2.3 : 1.1;
+  
+  baseScale = multiplier / size; 
   pet.scale.setScalar(baseScale); 
   
   pet.position.x = -center.x * baseScale;
-  pet.position.y = -box.min.y * baseScale; 
+  pet.position.y = (-box.min.y * baseScale) - (isDesktop ? 0.3 : 0); /* Centrar mejor verticalmente en monitores grandes */
   pet.position.z = -center.z * baseScale;
 }
 
@@ -522,22 +529,28 @@ function triggerEvolvementAlert(targetLevel, textHeader) {
   
   const revealDiv = document.getElementById("reveal");
   revealDiv.classList.remove("active", "mutated", "surprise");
-  document.getElementById("reveal-text-header").innerText = textHeader;
+  
+  const header = document.getElementById("reveal-text-header");
+  header.style.opacity = "1";
+  header.innerText = textHeader;
   
   revealDiv.classList.add("active");
 }
 
 window.handleRevealClick = function() {
   const revealDiv = document.getElementById("reveal");
+  const header = document.getElementById("reveal-text-header");
 
   if (revealStep === 0) {
-    document.getElementById("reveal-text-header").innerText = "DIAMA X PRRTS UNLOCKED";
+    // 🎛️ LOOK LIMINAL: Desaparece por completo el texto superior, dejando únicamente los logos flotando.
+    header.style.opacity = "0"; 
     revealDiv.classList.add("mutated");
     revealStep = 1;
   } 
   else if (revealStep === 1) {
     revealDiv.classList.add("surprise");
-    document.getElementById("reveal-text-header").innerText = "VIERNES 17 DE JULIO DEL 2026\n";
+    header.style.opacity = "1";
+    header.innerText = "VIERNES 17 DE JULIO DEL 2026\n";
     revealStep = 2;
   } 
   else if (revealStep === 2) {
