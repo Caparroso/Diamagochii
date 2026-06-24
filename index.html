@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DIAMA Pet - Tamagotchi Hardcore</title>
+
+<style>
+  body { 
+    margin: 0; 
+    overflow: hidden; 
+    background: #0b0b10; 
+    font-family: Arial, sans-serif; 
+    user-select: none; 
+  }
+  canvas { 
+    display: block; 
+  }
+
+  #ui {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10;
+    box-sizing: border-box;
+    border-top: 2px solid #ff3df2;
+  }
+
+  button {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 10px;
+    background: #ff3df2;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.1s, background 0.2s;
+    box-shadow: 0 4px 10px rgba(255, 61, 242, 0.4);
+  }
+  button:active { transform: scale(0.95); }
+  button:hover { background: #e032d5; }
+  button:disabled { background: #444; color: #888; box-shadow: none; cursor: not-allowed; }
+
+  #stats {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 14px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 12px;
+    border-radius: 8px;
+    line-height: 1.6;
+    border-left: 3px solid #3dffae;
+  }
+
+  .progress-bar {
+    width: 100px;
+    height: 8px;
+    background: #222;
+    display: inline-block;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #3dffae;
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  /* 🎨 PALETA SELECTORA DE COLORES PARA PRRT */
+  #color-picker {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-right: 3px solid #ff3df2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .color-label {
+    color: #eee;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: monospace;
+  }
+  .color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.1s, border-color 0.2s;
+  }
+  .color-dot:hover {
+    transform: scale(1.2);
+    border-color: #fff;
+  }
+
+  /* 🎬 PANTALLA DE REVELACIÓN EVOLUTIVA CINEMÁTICA Y2K */
+  #reveal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.98);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    cursor: pointer;
+  }
+
+  .reveal-title {
+    font-size: 16px;
+    letter-spacing: 4px;
+    color: #3dffae;
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: bold;
+    max-width: 80%;
+    line-height: 1.4;
+  }
+
+  .brand-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    height: 60px;
+    visibility: hidden;
+  }
+
+  .part-prrts { opacity: 0; transform: translateX(40px); }
+  .part-x { margin: 0 15px; color: #ff3df2; opacity: 0; transform: scale(0); }
+  .part-diama { opacity: 0; transform: translateX(-40px); }
+
+  .reveal-footer {
+    position: absolute;
+    bottom: 30px;
+    font-size: 11px;
+    opacity: 0;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+  }
+
+  #reveal.active { display: flex; }
+  
+  #reveal.mutated .brand-container { visibility: visible; }
+  #reveal.mutated .part-prrts { animation: slideInLeft 0.8s 0.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+  #reveal.mutated .part-x { animation: popIn 0.4s 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+  #reveal.mutated .part-diama { animation: slideInRight 0.8s 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+  #reveal.mutated .reveal-footer { animation: fadeIn 0.8s 2.2s forwards; }
+
+  #reveal.surprise .brand-container { display: none; }
+  #reveal.surprise .reveal-title { font-size: 24px; color: #ffffff; letter-spacing: 2px; }
+
+  /* 💀 PANTALLA DE MUERTE (GAME OVER) */
+  #gameover-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 5, 5, 0.95);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 150;
+    color: #ff3d3d;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    padding: 20px;
+  }
+  #gameover-screen h1 { font-size: 40px; margin-bottom: 10px; letter-spacing: 3px; }
+  #gameover-screen p { color: #eee; font-size: 18px; margin-bottom: 30px; max-width: 500px; }
+
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes popIn { to { opacity: 1; transform: scale(1); } }
+  @keyframes slideInLeft { to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideInRight { to { opacity: 1; transform: translateX(0); } }
+</style>
+</head>
+
+<body>
+
+<div id="stats"></div>
+
+<div id="color-picker">
+  <span class="color-label">SKIN:</span>
+  <div class="color-dot" style="background: #8B5A2B;" onclick="changePetColor(0x8B5A2B)"></div>
+  <div class="color-dot" style="background: #1A1A1A;" onclick="changePetColor(0x1A1A1A)"></div>
+  <div class="color-dot" style="background: #7F8C8D;" onclick="changePetColor(0x7F8C8D)"></div>
+  <div class="color-dot" style="background: #F5F5DC;" onclick="changePetColor(0xF5F5DC)"></div>
+</div>
+
+<div id="ui">
+  <button id="btn-feed">🍖 Feed</button>
+  <button id="btn-play">🎾 Play</button>
+</div>
+
+<div id="reveal" onclick="handleRevealClick()">
+  <div class="reveal-title" id="reveal-text-header">¡OH! PRRT ESTÁ EVOLUCIONANDO</div>
+  <div class="brand-container">
+    <span class="part-prrts">PRRTS</span>
+    <span class="part-x">X</span>
+    <span class="part-diama">DIAMA</span>
+  </div>
+  <div class="reveal-footer">clic en cualquier lugar para continuar</div>
+</div>
+
+<div id="gameover-screen">
+  <h1>GAME OVER</h1>
+  <p id="death-reason">Oh no, prrt ha muerto...</p>
+  <button onclick="window.location.reload()" style="background: #ff3d3d; box-shadow: 0 4px 10px rgba(255,61,61,0.4);">Intentar de Nuevo</button>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+let scene, camera, renderer, pet, gltfData;
+let mixer, actions = {}; 
+let currentAction = null; 
+let clock = new THREE.Clock(); 
+let animationTimeout = null;
+
+let hunger = 40;     
+let happiness = 50;  
+let evolution = 0;   
+let evoProgress = 0; 
+let overfeedingCounter = 0; 
+
+let baseScale = 1.2;
+let evolutionPending = false; 
+let isDead = false;
+let revealStep = 0; 
+
+// Banco de colores inicial aleatorio
+const dogColors = [0x8B5A2B, 0x1A1A1A, 0x7F8C8D, 0xF5F5DC];
+let activeColor = dogColors[Math.floor(Math.random() * dogColors.length)];
+
+init();
+animate();
+
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0b0b10);
+
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 1.2, 3.5); 
+  camera.lookAt(0, 0.4, 0);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.colorSpace = THREE.SRGBColorSpace; 
+  document.body.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+  dirLight.position.set(5, 5, 5);
+  scene.add(dirLight);
+
+  const loader = new GLTFLoader();
+
+  loader.load("./Models/Dog.gltf", (gltf) => {
+    gltfData = gltf; 
+    pet = gltf.scene;
+
+    // Aplicación del material inicial
+    applyPetMaterial(activeColor);
+
+    recalculateModelBounds();
+    scene.add(pet);
+    setupAnimationMixer();
+    updateStats();
+
+    setInterval(() => {
+      if (evolutionPending || isDead) return;
+
+      hunger = Math.min(100, hunger + 4);
+      happiness = Math.max(0, happiness - 3);
+
+      if (hunger > 10 && overfeedingCounter > 0) {
+        overfeedingCounter--;
+      }
+
+      if (hunger >= 100) {
+        if (happiness <= 5) {
+          triggerDeath("oh no prrt murio por abandono :(");
+        } else {
+          triggerDeath("oh no prrt se le cerro el estomago porque no le diste de comer");
+        }
+        return;
+      }
+
+      if (hunger < 75 && happiness > 25) {
+        evoProgress = Math.min(100, evoProgress + 5); 
+      }
+
+      updateStats();
+      checkEvolutionTriggers();
+    }, 2000);
+
+  }, undefined, (err) => {
+    console.error("Error al cargar el modelo 3D:", err);
+  });
+
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  document.getElementById("btn-feed").addEventListener("click", feed);
+  document.getElementById("btn-play").addEventListener("click", play);
+}
+
+// Función centralizada para pintar al perro con look vinilo mate premium
+function applyPetMaterial(hexColor) {
+  if (!pet) return;
+  pet.traverse((c) => {
+    if (c.isMesh) {
+      c.material = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(hexColor), 
+        roughness: 0.75,                
+        metalness: 0.05,                
+        envMapIntensity: 0.5            
+      });
+    }
+  });
+}
+
+// Exponer la función globalmente para los botones HTML onclick
+window.changePetColor = function(hexColor) {
+  if (isDead) return;
+  activeColor = hexColor;
+  applyPetMaterial(hexColor);
+};
+
+function setupAnimationMixer() {
+  if (mixer) mixer.stopAllAction();
+  
+  mixer = new THREE.AnimationMixer(pet);
+  actions = {};
+
+  gltfData.animations.forEach((clip) => {
+    actions[clip.name] = mixer.clipAction(clip);
+  });
+
+  if (actions["Idle"] && !isDead) {
+    currentAction = actions["Idle"];
+    currentAction.setLoop(THREE.LoopRepeat);
+    currentAction.play();
+  }
+}
+
+function recalculateModelBounds() {
+  const box = new THREE.Box3().setFromObject(pet);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3()).length();
+  
+  baseScale = 1.2 / size; 
+  pet.scale.setScalar(baseScale); 
+  
+  pet.position.x = -center.x * baseScale;
+  pet.position.y = -box.min.y * baseScale; 
+  pet.position.z = -center.z * baseScale;
+}
+
+function triggerInteractionAnimation(name) {
+  if (!mixer || !actions[name] || !actions["Idle"] || evolutionPending || isDead) return;
+
+  if (animationTimeout) clearTimeout(animationTimeout);
+
+  const targetAction = actions[name];
+  const idleAction = actions["Idle"];
+
+  targetAction.reset();
+  targetAction.setLoop(THREE.LoopOnce);
+  targetAction.clampWhenFinished = true;
+
+  if (currentAction && currentAction !== targetAction) {
+    targetAction.crossFadeFrom(currentAction, 0.05, true);
+  }
+  
+  targetAction.play();
+  currentAction = targetAction;
+
+  const durationInMs = targetAction.getClip().duration * 1000;
+
+  animationTimeout = setTimeout(() => {
+    if (mixer && !isDead) {
+      idleAction.reset();
+      idleAction.crossFadeFrom(targetAction, 0.1, true);
+      idleAction.play();
+      currentAction = idleAction;
+    }
+  }, durationInMs);
+}
+
+function triggerDeath(reasonText) {
+  isDead = true;
+  if (animationTimeout) clearTimeout(animationTimeout);
+  
+  document.getElementById("btn-feed").disabled = true;
+  document.getElementById("btn-play").disabled = true;
+
+  if (mixer) mixer.stopAllAction();
+  
+  if (actions["Death"]) {
+    const deathAction = actions["Death"];
+    deathAction.reset();
+    deathAction.setLoop(THREE.LoopOnce);
+    deathAction.clampWhenFinished = true; 
+    deathAction.play();
+  }
+
+  setTimeout(() => {
+    document.getElementById("death-reason").innerText = reasonText;
+    document.getElementById("gameover-screen").style.display = "flex";
+  }, 1200);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  if (mixer) mixer.update(delta); 
+  renderer.render(scene, camera);
+}
+
+function updateStats() {
+  if (isDead) return;
+  const evoWidth = evoProgress + "%";
+  document.getElementById("stats").innerHTML = `
+    🍖 Hunger: ${hunger}% (0% = lleno)<br/>
+    ❤️ Happiness: ${happiness}%<br/>
+    🌱 Stage: ${evolution === 0 ? "Baby PRRT" : evolution === 1 ? "DIAMA Mode" : "Max Alpha"}<br/>
+    🧬 Evo Progress: <div class="progress-bar"><div class="progress-fill" style="width: ${evoWidth}"></div></div>
+  `;
+}
+
+function checkEvolutionTriggers() {
+  if (evoProgress >= 100 && evolution === 0 && !evolutionPending) {
+    triggerEvolvementAlert(1, "¡OH! PRRT ESTÁ EVOLUCIONANDO");
+  } else if (evoProgress >= 100 && evolution === 1 && !evolutionPending) {
+    triggerEvolvementAlert(2, "¡OH! PRRT ESTÁ SUBIENDO AL MÁXIMO NIVEL DIAMA");
+  }
+}
+
+function feed() { 
+  if (evolutionPending || isDead) return;
+
+  if (hunger <= 0) {
+    overfeedingCounter++;
+    if (overfeedingCounter >= 3) { 
+      triggerDeath("oh no prrt a muerto por comer demasiadoo");
+      return;
+    }
+  }
+
+  hunger = Math.max(0, hunger - 20); 
+  happiness = Math.min(100, happiness + 4);
+  updateStats(); 
+  
+  triggerInteractionAnimation("Idle_Eating"); 
+}
+
+function play() { 
+  if (evolutionPending || isDead) return;
+
+  if (happiness >= 100) {
+    triggerDeath("oh no prrt le dio un paro cardiaco por agitarse muchooo.");
+    return;
+  }
+
+  hunger = Math.min(100, hunger + 8); 
+  happiness = Math.min(100, happiness + 20); 
+  updateStats(); 
+  
+  triggerInteractionAnimation("Headbutt"); 
+}
+
+function triggerEvolvementAlert(targetLevel, textHeader) {
+  evolutionPending = true;
+  window.nextEvolutionLevel = targetLevel; 
+  revealStep = 0; 
+  
+  const revealDiv = document.getElementById("reveal");
+  revealDiv.classList.remove("active", "mutated", "surprise");
+  document.getElementById("reveal-text-header").innerText = textHeader;
+  
+  revealDiv.classList.add("active");
+}
+
+window.handleRevealClick = function() {
+  const revealDiv = document.getElementById("reveal");
+
+  if (revealStep === 0) {
+    document.getElementById("reveal-text-header").innerText = "DIAMA X PRRTS UNLOCKED";
+    revealDiv.classList.add("mutated");
+    revealStep = 1;
+  } 
+  else if (revealStep === 1) {
+    revealDiv.classList.add("surprise");
+    document.getElementById("reveal-text-header").innerText = "VIERNES 17 DE JULIO DEL 2026\n";
+    revealStep = 2;
+  } 
+  else if (revealStep === 2) {
+    evolution = window.nextEvolutionLevel;
+    evoProgress = 0; 
+    overfeedingCounter = 0; 
+
+    setupAnimationMixer();
+    updateStats();
+
+    revealDiv.classList.remove("active", "mutated", "surprise");
+    evolutionPending = false;
+    revealStep = 0;
+  }
+}
+</script>
+
+</body>
+</html>
