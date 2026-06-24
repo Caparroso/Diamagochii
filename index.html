@@ -137,19 +137,27 @@
     line-height: 1.4;
   }
 
+  /* Contenedor de logos adaptado */
   .brand-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 42px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    height: 60px;
+    gap: 20px;
+    height: 120px;
     visibility: hidden;
+    animation: floatAnimation 3s ease-in-out infinite alternate; /* Animación de flotado constante */
+  }
+
+  /* Estilos para los logos PNG e inversión de color para fondos oscuros */
+  .logo-img {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    filter: invert(1); /* Convierte logos oscuros/negros a blanco brillante */
   }
 
   .part-prrts { opacity: 0; transform: translateX(40px); }
-  .part-x { margin: 0 15px; color: #ff3df2; opacity: 0; transform: scale(0); }
+  .part-x { font-size: 36px; font-weight: 900; color: #ff3df2; opacity: 0; transform: scale(0); font-family: Arial, sans-serif; }
   .part-diama { opacity: 0; transform: translateX(-40px); }
 
   .reveal-footer {
@@ -194,6 +202,12 @@
   @keyframes popIn { to { opacity: 1; transform: scale(1); } }
   @keyframes slideInLeft { to { opacity: 1; transform: translateX(0); } }
   @keyframes slideInRight { to { opacity: 1; transform: translateX(0); } }
+  
+  /* Efecto flotando sutil */
+  @keyframes floatAnimation {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-12px); }
+  }
 </style>
 </head>
 
@@ -214,12 +228,13 @@
   <button id="btn-play">🎾 Play</button>
 </div>
 
+<!-- 🎬 PANTALLA DE REVELACIÓN CON LOGOS FLOTANTES -->
 <div id="reveal" onclick="handleRevealClick()">
   <div class="reveal-title" id="reveal-text-header">¡OH! PRRT ESTÁ EVOLUCIONANDO</div>
   <div class="brand-container">
-    <span class="part-prrts">PRRTS</span>
+    <img src="./Prrts.png" alt="Prrts Logo" class="logo-img part-prrts" />
     <span class="part-x">X</span>
-    <span class="part-diama">DIAMA</span>
+    <img src="./Diama.png" alt="Diama Logo" class="logo-img part-diama" />
   </div>
   <div class="reveal-footer">clic en cualquier lugar para continuar</div>
 </div>
@@ -260,7 +275,6 @@ let evolutionPending = false;
 let isDead = false;
 let revealStep = 0; 
 
-// Banco de colores inicial aleatorio
 const dogColors = [0x8B5A2B, 0x1A1A1A, 0x7F8C8D, 0xF5F5DC];
 let activeColor = dogColors[Math.floor(Math.random() * dogColors.length)];
 
@@ -287,14 +301,11 @@ function init() {
 
   const loader = new GLTFLoader();
 
-  // 🛠️ RUTA CORREGIDA: Al estar index.html y Dog.gltf al mismo nivel, cargamos directo desde "./Dog.gltf"
   loader.load("./Dog.gltf", (gltf) => {
     gltfData = gltf; 
     pet = gltf.scene;
 
-    // Aplicación del material inicial
     applyPetMaterial(activeColor);
-
     recalculateModelBounds();
     scene.add(pet);
     setupAnimationMixer();
@@ -341,7 +352,6 @@ function init() {
   document.getElementById("btn-play").addEventListener("click", play);
 }
 
-// Función centralizada para pintar al perro con look vinilo mate premium
 function applyPetMaterial(hexColor) {
   if (!pet) return;
   pet.traverse((c) => {
@@ -356,7 +366,6 @@ function applyPetMaterial(hexColor) {
   });
 }
 
-// Exponer la función globalmente para los botones HTML onclick
 window.changePetColor = function(hexColor) {
   if (isDead) return;
   activeColor = hexColor;
